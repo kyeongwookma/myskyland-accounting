@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>하늘땅 급여·연차</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">하늘땅 어린이집</p>
+      <h1>급여·연차</h1>
+    </div>
+    <div class="header-actions">
+      <span id="save-status" class="save-status">이 브라우저에 저장됨</span>
+      <button id="help-button" class="button ghost" type="button">처음 사용 안내</button>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="업무 단계">
+    <button data-view="dashboard" class="active">1. 시작</button>
+    <button data-view="imports">2. 자료 가져오기</button>
+    <button data-view="employees">3. 직원 관리</button>
+    <button data-view="payroll">4. 이번 달 급여</button>
+    <button data-view="deductions">5. 보험·공제</button>
+    <button data-view="review">6. 검토·마감</button>
+    <button data-view="outputs">7. 출력·백업</button>
+    <button data-view="leave">연차 관리</button>
+  </nav>
+
+  <main>
+    <section id="view-dashboard" class="view active">
+      <div class="page-heading">
+        <div><p class="eyebrow">이번 작업</p><h2 id="dashboard-title">2026년 7월 급여</h2><p>순서대로 확인하면 필요한 출력물까지 한 번에 만들 수 있습니다.</p></div>
+        <button id="new-month" class="button secondary" type="button">새 급여월 만들기</button>
+      </div>
+      <div id="closed-banner" class="notice success hidden"></div>
+      <div class="dashboard-grid">
+        <article class="card settings-card">
+          <h3>기본 설정</h3>
+          <label>급여월<input id="payroll-month" type="month"></label>
+          <label>지급일<input id="pay-date" type="date"></label>
+          <label>기관명<input id="organization-name" type="text"></label>
+          <label>시설명<input id="facility-name" type="text"></label>
+        </article>
+        <article class="card status-card">
+          <div class="card-title-row"><h3>진행 상태</h3><span id="progress-label" class="pill"></span></div>
+          <ol id="workflow-list" class="workflow-list"></ol>
+        </article>
+        <article class="card totals-card">
+          <h3>이번 달 합계</h3>
+          <div class="metric"><span>지급계</span><strong id="dash-gross">0원</strong></div>
+          <div class="metric"><span>공제계</span><strong id="dash-deduction">0원</strong></div>
+          <div class="metric accent"><span>실지급액</span><strong id="dash-net">0원</strong></div>
+          <p class="muted">지급주체 전체 기준</p>
+        </article>
+      </div>
+      <div class="notice info"><strong>자료 준비:</strong> 매월 23일부터 원장의 수당 내역과 사회보험 포털 자료를 확인하고, 25일 지급 전에 원장·재정이사의 검토를 받습니다.</div>
+    </section>
+
+    <section id="view-imports" class="view">
+      <div class="page-heading"><div><p class="eyebrow">다운로드 이후 자동 처리</p><h2>자료 자동 가져오기</h2><p>받은 XLSX·CSV 파일을 한꺼번에 넣으면 종류를 찾고 직원별 변경 내용을 미리 보여줍니다.</p></div><span id="import-month-label" class="month-chip"></span></div>
+      <div class="notice warning"><strong>적용 대상은 현재 급여월입니다.</strong> 파일에서 다른 급여월이 발견되면 적용 전에 경고합니다. 주민번호·보험번호·비밀번호 열은 읽은 뒤 즉시 버리고 저장하지 않습니다.</div>
+      <label id="import-drop-zone" class="import-drop-zone" tabindex="0">
+        <input id="import-files" type="file" accept=".xlsx,.csv,.tsv,text/csv,text/tab-separated-values" multiple>
+        <strong>파일을 여기에 끌어놓거나 눌러서 선택</strong>
+        <span>통합산출, 시간외·연차, 제수당, 포털 보험 5종, 표준 급여 입력표를 함께 선택할 수 있습니다.</span>
+      </label>
+      <div class="row-actions import-actions"><button id="download-import-template" class="button ghost" type="button">입력용 CSV 양식 받기</button><button id="clear-import" class="button ghost hidden" type="button">선택 취소</button><button id="apply-import" class="button primary hidden" type="button">선택한 자료 적용</button></div>
+      <div id="import-status" class="notice info">아직 선택한 파일이 없습니다.</div>
+      <div id="import-summary" class="import-summary"></div>
+      <div id="import-preview-wrap" class="table-wrap hidden"><table id="import-preview"><thead><tr><th>적용</th><th>자료</th><th>원본 직원</th><th>연결할 직원 ID</th><th>변경 내용</th><th>확인사항</th></tr></thead><tbody></tbody></table></div>
+      <div id="import-history" class="card import-history"><h3>이 급여월 가져오기 기록</h3><div class="muted">아직 적용 기록이 없습니다.</div></div>
+    </section>
+
+    <section id="view-employees" class="view">
+      <div class="page-heading"><div><p class="eyebrow">고정값</p><h2>직원 관리</h2><p>이름과 매달 반복되는 급여 기준을 관리합니다. 변경 내용은 현재와 이후 계산에 반영됩니다.</p></div><button id="add-employee" class="button primary" type="button">직원 추가</button></div>
+      <div class="notice warning">생년월일은 명세서에 꼭 필요할 때만 입력하세요. 주민등록번호와 포털 비밀번호는 저장하지 않습니다.</div>
+      <div class="table-wrap"><table id="employees-table"><thead><tr><th>재직</th><th>성명</th><th>별칭</th><th>지급주체</th><th>1일 시간</th><th>월 기준시간</th><th>기본급</th><th>근속수당</th><th>직책수당</th><th>근로지원금</th><th>식대 비과세</th><th>차량 비과세</th><th>공제대상<br>(본인 포함)</th><th>8~20세<br>자녀</th><th>생년월일(선택)</th><th></th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section id="view-payroll" class="view">
+      <div class="page-heading"><div><p class="eyebrow">원장 전달자료</p><h2>이번 달 급여</h2><p>시간외와 이번 달에만 생긴 수당을 입력하세요. 계산 결과는 즉시 반영됩니다.</p></div><span id="payroll-month-label" class="month-chip"></span></div>
+      <div class="legend"><span><i class="dot input"></i>직접 입력</span><span><i class="dot calculated"></i>자동 계산</span></div>
+      <div class="table-wrap"><table id="payroll-table"><thead><tr><th>직원</th><th>이번 달 기본급<br>직접수정</th><th>시간외<br>시간</th><th>시간외수당<br>직접수정</th><th>활동/들살이</th><th>연차수당</th><th>명절수당</th><th>추가 제수당</th><th>미지급급여</th><th>추가 비과세</th><th>사협 별도지급</th><th>비고</th><th>지급계</th><th>과세급여</th></tr></thead><tbody></tbody><tfoot></tfoot></table></div>
+      <p class="footnote">시간외수당 = (기본급 + 근속수당) ÷ 월 기준시간 × 1.5 × 시간, 10원 단위 올림. 직접수정 칸을 비우면 자동 계산합니다. 중도 입퇴사 일할계산은 기본급 직접수정 칸에 확정액을 넣으세요(시간외 단가는 월 기본급 기준 유지).</p>
+    </section>
+
+    <section id="view-deductions" class="view">
+      <div class="page-heading"><div><p class="eyebrow">사회보험 포털 자료</p><h2>보험·공제</h2><p>포털에서 확인한 최종 근로자 부담액을 입력합니다. 여러 명은 표로 한 번에 붙여넣을 수 있습니다.</p></div><button id="bulk-deductions" class="button secondary" type="button">표 붙여넣기</button></div>
+      <div class="notice info">포털에서 내려받은 <strong>원자료를 표 붙여넣기로 넣으면 공제액이 자동 계산</strong>됩니다(국민연금 = 결정보험료 ÷ 2 − 두루누리 지원 ÷ 2, 건강·요양 = 고지보험료, 고용 = 보험료합계 − 근로자 두루누리 지원). 칸에 직접 입력하면 최종 공제액으로 우선 적용됩니다.</div>
+      <div class="table-wrap"><table id="deductions-table"><thead><tr><th>직원</th><th>국민연금</th><th>건강보험</th><th>장기요양</th><th>고용보험</th><th>소득세 자동</th><th>소득세 직접수정</th><th>지방소득세</th><th>연말정산</th><th>기타공제</th><th>보험 확인</th><th>공제계</th><th>실지급액</th></tr></thead><tbody></tbody><tfoot></tfoot></table></div>
+    </section>
+
+    <section id="view-review" class="view">
+      <div class="page-heading"><div><p class="eyebrow">자동 검산</p><h2>검토·마감</h2><p>오류는 수정 후 마감하고, 주의사항은 근거를 확인하세요.</p></div><button id="close-month" class="button primary" type="button">이 급여월 마감</button></div>
+      <div class="review-summary"><div><span>오류</span><strong id="error-count">0</strong></div><div><span>주의</span><strong id="warning-count">0</strong></div><div><span>재직자</span><strong id="employee-count">0</strong></div><div><span>실지급 합계</span><strong id="review-net">0원</strong></div></div>
+      <div id="review-list" class="review-list"></div>
+      <div class="card check-card"><h3>담당자 확인</h3><label><input id="manager-reviewed" type="checkbox"> 원장 검토 완료</label><label><input id="director-reviewed" type="checkbox"> 재정이사 검토 완료</label><label><input id="retirement-updated" type="checkbox"> 퇴직연금 기준급여 업데이트 완료</label></div>
+    </section>
+
+    <section id="view-outputs" class="view">
+      <div class="page-heading"><div><p class="eyebrow">전달자료와 보관</p><h2>출력·백업</h2><p>명세서는 인쇄 창에서 PDF로 저장할 수 있습니다. CSV와 JSON에는 개인정보가 있으므로 안전하게 보관하세요.</p></div></div>
+      <div class="output-grid">
+        <article class="card output-card"><h3>급여명세서</h3><p>재직자별 상세 지급·공제 내역과 잔여연차를 출력합니다.</p><div class="row-actions"><select id="payslip-employee"></select><button id="print-one" class="button secondary">1명 인쇄</button><button id="print-all" class="button primary">전체 인쇄</button></div></article>
+        <article class="card output-card"><h3>인건비 지급내역</h3><p>어린이집 지급 직원만 포함하는 원장 전달용 CSV입니다.</p><button id="download-labor" class="button secondary">CSV 내려받기</button></article>
+        <article class="card output-card"><h3>세무사 급여정산</h3><p>과세·비과세와 지급주체를 구분한 세무사 전달용 CSV입니다.</p><button id="download-tax" class="button secondary">CSV 내려받기</button></article>
+        <article class="card output-card"><h3>전체 백업</h3><p>직원·급여·연차를 한 파일로 보관합니다. 다른 PC로 옮길 때도 사용합니다.</p><div class="row-actions"><button id="export-json" class="button primary">JSON 백업</button><label class="button ghost file-button">JSON 복원<input id="import-json" type="file" accept="application/json"></label></div></article>
+      </div>
+    </section>
+
+    <section id="view-leave" class="view">
+      <div class="page-heading"><div><p class="eyebrow">별도 관리</p><h2>연차 관리</h2><p>연도별 부여일수와 사용 기록을 입력하면 잔여연차가 자동 계산됩니다.</p></div><div class="row-actions"><select id="leave-year"></select><button id="add-leave-event" class="button primary">사용 기록 추가</button></div></div>
+      <div class="table-wrap"><table id="leave-table"><thead><tr><th>직원</th><th>부여일수</th><th>조정</th><th>사용일수</th><th>잔여연차</th><th>미사용수당 예상</th></tr></thead><tbody></tbody></table></div>
+      <div class="card"><h3>사용 기록</h3><div class="table-wrap"><table id="leave-events-table"><thead><tr><th>날짜</th><th>직원</th><th>사용일수</th><th>사유</th><th></th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+  </main>
+
+  <dialog id="help-dialog"><form method="dialog"><div class="dialog-heading"><h2>처음 사용 안내</h2><button class="icon-button" value="cancel" aria-label="닫기">×</button></div><ol class="help-steps"><li><strong>급여월 열기</strong><span>시작 화면에서 급여월과 지급일을 확인합니다.</span></li><li><strong>자료 가져오기</strong><span>내려받거나 전달받은 XLSX·CSV를 한꺼번에 선택하고 미리보기 후 적용합니다.</span></li><li><strong>누락 확인</strong><span>직원·급여·보험 화면에서 자동으로 채워지지 않은 항목만 확인합니다.</span></li><li><strong>검토 후 출력</strong><span>오류를 없애고 승인 확인 후 출력·백업합니다.</span></li></ol><div class="notice warning">이 페이지는 자동 저장되지만 서버 동기화는 하지 않습니다. 월 마감 때 JSON 백업을 꼭 만드세요.</div><div class="dialog-actions"><a class="button secondary" href="guide.html" target="_blank">그림처럼 자세히 보기</a><button class="button primary" value="default">확인</button></div></form></dialog>
+
+  <dialog id="bulk-dialog"><form method="dialog"><div class="dialog-heading"><h2>보험·공제 표 붙여넣기</h2><button class="icon-button" value="cancel" aria-label="닫기">×</button></div>
+    <label>자료 종류
+      <select id="bulk-mode">
+        <option value="auto">자동 인식 (포털 엑셀 통째로 붙이기)</option>
+        <option value="pension">국민연금 원자료 (징수포털 결정보험료)</option>
+        <option value="healthcare">건강·요양 원자료 (징수포털 고지보험료)</option>
+        <option value="employment">고용보험 원자료 (토탈서비스 보험료합계)</option>
+        <option value="final">최종 공제액 직접 입력</option>
+      </select>
+    </label>
+    <p>자동 인식은 다운로드한 엑셀을 열고 전체 선택·복사해 붙이면 헤더로 파일 종류와 열을 찾습니다. 수동 모드는 아래 열 순서로 복사합니다. 원자료 모드는 근로자 공제액을 자동 계산합니다.</p><code id="bulk-format">포털에서 내려받은 엑셀 시트를 헤더 줄까지 통째로 복사해 붙이세요(국민연금·건강·고용 산출내역, 두루누리 지원금 2종).</code><textarea id="bulk-text" rows="10" placeholder="홍길동&#9;100000&#9;80000"></textarea><div id="bulk-result" class="muted"></div><div class="dialog-actions"><button class="button ghost" value="cancel">취소</button><button id="apply-bulk" class="button primary" type="button">적용</button></div></form></dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="print-root"></div>
+  <script src="data/tax-table-2026.js"></script>
+  <script src="payroll.js"></script>
+  <script src="importers.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

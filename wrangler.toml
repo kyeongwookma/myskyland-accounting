@@ -1,0 +1,7 @@
+name = "myskyland-accounting"
+compatibility_date = "2026-01-01"
+pages_build_output_dir = "dist"
+
+[[kv_namespaces]]
+binding = "STATE"
+id = "7af500463cd74639afb33e9bca7456b5"

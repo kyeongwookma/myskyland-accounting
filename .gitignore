@@ -1,0 +1,11 @@
+dist/
+.DS_Store
+
+.codepresso/
+# 원본 자료(주민번호·비밀번호 평문 포함): 월별 폴더로 보관, 저장소에 올리지 않음
+원본자료/
+
+automation/node_modules/
+automation/.profile/
+__pycache__/
+.wrangler/
